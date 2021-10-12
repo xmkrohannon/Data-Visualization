@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>Project Design Document</title>
+		<script src="https://d3js.org/d3.v3.js"></script>
+		<script src="https://d3js.org/topojson.v1.min.js"></script>
+		<style>						
+			ul {
+				list-style-type: none;
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+				background-color: #333;
+			}
+			
+			li {
+				float: left;
+			}
+			
+			li a {
+				display: block;
+				color: #fff;
+				text-align: center;
+				padding: 10px 16px;
+				text-decoration: none;
+			}
+			
+			li a:hover {
+				background-color: #000;
+			}
+				
+		</style>
+	</head>
+	<body>
+		<ul>
+			<li> <a href = "/project_1.html">Home</a></li>
+			<li> <a href ="/documentation.html">Documentation</a></li>
+			<li> <a href ="/about">About</a></li>
+		</ul>
+		<script>
+			<p> From the beginning the vision of the project was to focus on the map image and then to add dashboard elements. In the first draft, the map was entire width of the screen and the map 
+			and the time covvered the length of the screen. This made scaling the image very easy, but when the gender dashboard was added, it required moving the screen up and down to see either 
+			the map or the dashboard. This meant that the size and scale of the map had to be adjusted. Fortunately, I had been able to set the size of the map to scale based upon the window of the 
+			browser viewing the image. So all that needed to be asjusted was the scale percentage of the map and the timeline. Once that decision was made, it was relativley easy to determine the size 
+			of the dashboard elements.</p>
+			<p> Once all of the elements were in place, there was a question of what to do if there was no selection from the timeline. I wavered between having nothing displayed and having everything 
+			displayed. Ultimately, I thought that having it be clean, with nothing showing, didn't add anything to the visualization. I thought that the primary objective of the timeline was if users wanted to 
+			zoom in to a specific point in time. So the decision was made, that in case that there was no selection from the timeline it would display all of the data.</p>
+			<p> Encoding all of the relevant data (position, age, and sex) of the victim was difficult. Typically, if you want to encode 4 dimensions of data, the most common ways of doing that are 
+			x-coordiante, y-coordinate, color, and size. However, due to the relative size of most screens, and the lower limit of human perception, using size for features more than two classes, didn't 
+			really make sense. This excluded age group as a feature that could be visualized with size, leaving only sex. However, using size for sex didn't really make sense either, as whichever sex had 
+			larger points would draw undue attention to that sex, over the other, especially given that sex didn't play a significant role in cholera victims. This meant that a less conventional approach would 
+			be required for visualizing sex. Given more time (or more experience with d3) I would have preferred to have used different markers for sex (suppose crosses for male and nodes for females).
+			Using a color-blind friendly, high contrast, diverging color scheme was decided as the least objectionable alternative for the sex. <p>
+			<p> Since color was being used for determination of the sex of the victim. Visualizing the age group of the victims was the next big problem. Unfortunately, using the divergent color scheme for 
+			sex significantly reduced the potential range of colors that would be realtively high contrast for the sex and for the age group. Additionally, the reuirement of 6 different classes for the victims 
+			compounded the problem. Reluctantly, the classic white to black conversion was settled upon, as it didn't clash with sex color differentiation, and didn't jepoardize significantly altering the 
+			color blind friendliness of the visualization. I'm not particularly pleased with this solution, I would have prefferred to find 6 unique high contrast color blind friendly colors and used those for the 
+			age visualization. </p>
+			<p> The visualization actually reveals several interesting things about the 1854 London cholera epidemic. First, the pie chart reveals no significnat difference in the sex of deceased victims. 
+			This indicates that sex had no measurable impact on the health outcomes of people exposed to the disease. The bar chart of the age groups of the victims reveal a significnat increase in group 
+			0 and group 5 relative to the rest of the groups. This indicates a classic bimodal disease efficacy distribution, with the disease being significantly more fatal in younger people, age 0 -10, (group 0)
+			ad older people, age > 80, (group 5). Finally, by checking out the coordinates of the homes of the people who died from the disease, reveals a highly localized area around on the city's water pumps.
+			This would seem to indicate that the water from the pump is at the epicenter of the epidemic, and the most likely cause of the outbreak. Given that cholera is known to be waterborne, this conclusion
+			is supported by external evidence. </p>
+		
+			<iframe width="560" height="315" src="https://www.youtube.com/embed/2BWfE6KmX2E " title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+		</script>
+	</body>
+</html>
