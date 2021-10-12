@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>London 1854 Cholera Epidemic</title>
+		<script src="https://d3js.org/d3.v3.js"></script>
+		<script src="https://d3js.org/topojson.v1.min.js"></script>
+		<style>			
+			.axis path, 
+			.axis line {
+				fill: none;
+				stroke: #000;
+				shape-rendering: crispEdges;
+			}
+			
+			.brush .extent {
+				fill: #000;
+				fill-opacity: 0.25;
+				shape-rendering: crispEdges;
+			}
+			
+			ul {
+				list-style-type: none;
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+				background-color: #333;
+			}
+			
+			li {
+				float: left;
+			}
+			
+			li a {
+				display: block;
+				color: #fff;
+				text-align: center;
+				padding: 10px 16px;
+				text-decoration: none;
+			}
+			
+			li a:hover {
+				background-color: #000;
+			}
+				
+		</style>
+	
+	</head>
+	<body>
+		<ul>
+			<li> <a href = "/project_1.html">Home</a></li>
+			<li> <a href ="#documentation">Documentation</a></li>
+			<li> <a href ="#about">About</a></li>
+		</ul>
+		<div id="project_1"></div>
+		<script>
+			const view_x = window.innerWidth || document.documentElement.clientWidth || document.documentElementsByTagName("body")[0].clientWidth;
+			const view_y = window.innerHeight || document.documentElement.clientHeight || document.documentElementsByTagName("body")[0].clientHeight;
+			const margin = {left : 0.03 * view_x, top : 0.03 * view_y};
+			
+			var main = d3.select("#project_1")
+				.append("svg")
+					.attr("width", view_x - margin.left)
+					.attr("height", view_y -  margin.top)
+					.attr("id", "main")
+					.attr("align", "center")
+			
+			const map_width = view_x * 0.65;
+			const map_height = view_y * 0.65
+			
+			var map = d3.select("#main")
+				.append("g")
+					.attr("transfrom", "translate(" + margin.left + "," + margin.top + ")");
+			
+			const pie_width = view_x * 0.22
+			const pie_height = view_y * 0.22
+			const pie_rad = Math.min(pie_width, pie_height) / 2
+			var gender_data = {"male" : 0, "female" : 0} 
+			var pie_cols = d3.scale.ordinal()
+				.domain(gender_data)
+				.range(["#008837", "#7b3194"]);
+			
+			var arc_gen = d3.svg.arc()
+				.innerRadius(0)
+				.outerRadius(pie_rad)
+			
+			var gender_chart = d3.select("#main")
+				.append("g")
+					.attr("transform", "translate(" + (map_width + pie_width / 2) + "," + ( 1.5 * margin.top + pie_height / 2) + ")");
+			
+			var gender_pie = d3.layout.pie()
+				.value(function(d) {return d.value; } )
+			
+			var pie_data = gender_pie(d3.entries(gender_data))
+			
+			gender_chart.append("text")
+				.attr("transform", "translate(" + 0 + ","+ (- pie_height / 2 - 3) +")")
+				.text("Victims by Sex")
+				.attr("text-anchor", "middle");
+			
+			var age_data = {"0" : 0, "1" : 0, "2" : 0, "3" : 0, "4" : 0, "5" : 0}
+			
+			var hist_data = d3.entries(age_data)
+			
+			var age_chart = d3.select("#main")
+				.append("g")
+					.attr("tranform", "translate(" + (map_width + pie_width / 2) + "," + (2.5 * margin.top + pie_height) + ")");
+			
+			var age_cols = d3.scale.ordinal()
+				.domain(age_data)
+				.range(["#f7f7f7", "#d9d9d9", "#bdbdbd", "#969696", "#636363", "#252525"]);
+			
+			var age_x = d3.scale.ordinal()
+				.domain(age_data)
+				.range([0, 1/6 * pie_width, 2/6 * pie_width, 3/6 * pie_width, 4/6 * pie_width, 5/6 * pie_width, pie_width]);
+			
+			var age_y = d3.scale.linear()
+				.domain([0,200])
+				.range([pie_height,0])
+			
+			var x_hist = d3.svg.axis()
+					.scale(age_x)
+					.orient("bottom")
+				
+			var y_hist = d3.svg.axis()
+					.scale(age_y)
+					.orient("left")
+			
+			age_chart.append("g")
+					.attr("class", "x axis")
+					.attr("transform", "translate(" + (map_width + margin.left) + "," + (3.5 * margin.top + 2 * pie_height) + ")")
+					.call(x_hist)
+				
+			age_chart.append("g")
+					.attr("class", "y axis")
+					.attr("transform", "translate(" + (map_width + margin.left) + "," + (3.5 * margin.top + pie_height) + ")")
+					.call(y_hist)
+			
+			age_chart.append("text")
+				.attr("transform", "translate(" + (map_width + pie_width / 2) + ","+ (2.5 * margin.top + pie_height ) +")")
+				.text("Victims by Age Group")
+				.attr("text-anchor", "middle");
+			
+			for (i = 0; i < 6; i ++ ){
+				age_chart.append("text")
+					.attr("transform", "translate(" + (map_width + margin.left + pie_width * (2 * i + 1) / 12) + "," + (2.5 * margin.top + 2.25 * pie_height) + ")")
+					.text(i)
+					.attr("text-anchor", "middle");
+			}
+			
+			const map_x = d3.scale.linear()
+				.domain([2.8,20])
+				.range([0, map_width]);
+			
+			const map_y = d3.scale.linear()
+				.domain([0,20])
+				.range([map_height, 0])
+			
+			const timeline = d3.select("#main")
+				.append("g")
+					.attr("transform", "translate(" + margin.left + "," + map_height + ")");
+			
+			const timeline_y = d3.scale.linear()
+				.domain([0,150])
+				.range([view_y * 0.2, 0])
+			
+			d3.json("/Data/streets.json", function(streets){
+				streets.forEach(function (d){
+					for (i = 0; i < (d.length -1); i ++){
+						map.selectAll("g")
+							.data(d)
+							.enter()
+							.append("line")
+								.attr("x1", map_x(d[i].x))
+								.attr("x2", map_x(d[i+ 1].x))
+								.attr("y1", map_y(d[i].y))
+								.attr("y2", map_y(d[i + 1].y))
+								.style("stroke", "#9b7653")
+								.style("stroke-width", 1.5)
+					}
+				});
+			});
+			
+			d3.csv("/Data/pumps.csv", function(pumps){
+				map.selectAll("g")
+					.data(pumps)
+					.enter()
+					.append("circle")
+						.attr("cx", function (d) { return map_x(d.x); } )
+						.attr("cy", function (d) { return map_y(d.y); } )
+						.attr("r", 5)
+						.attr("id", "well")
+						.style("fill", "#006994")
+			});
+						
+			d3.csv("/Data/deathdays.csv", function(deathdays){
+				var timeline_x = d3.time.scale()
+					.domain(d3.extent(deathdays, function(d) {
+						return new Date(d.date);
+					}))
+					.range([margin.left,map_width - margin.left])
+				
+				var x_axis = d3.svg.axis()
+					.scale(timeline_x)
+					.orient("bottom")
+				
+				var y_axis = d3.svg.axis()
+					.scale(timeline_y)
+					.orient("left")
+				
+				timeline.append("g")
+					.attr("class", "x axis")
+					.attr("transform", "translate(0," + 0.2 * view_y + ")")
+					.call(x_axis)
+				
+				timeline.append("g")
+					.attr("class", "y axis")
+					.attr("transform", "translate(" + margin.left + ", 0)")
+					.call(y_axis)
+				
+				timeline.append("path")
+					.attr("class", "density")
+					.datum(deathdays)
+					.attr("fill", "#454545")
+					.attr("stroke", "#000")
+					.attr("stroke-width", 1)
+					.attr("stroke-linejoin", "round")
+					.attr("d", d3.svg.area()
+						.interpolate("linear")
+						.x(function (d) { return timeline_x(new Date(d.date)); })
+						.y0(0.2 * view_y)
+						.y1(function (d) { return timeline_y(d.deaths); })
+					);
+				
+				timeline.append("text")
+					.attr("transform", "translate(" + ((map_width - margin.left) / 2) + ","+ (0.26 * view_y) +")")
+					.text("Date in 1854")
+					.attr("text-anchor", "middle");
+				
+				timeline.append("text")
+					.attr("transform", "translate(" + (-map_width * 0.015) + ","+ (0.19 * view_y) +") rotate(270)")
+					.text("Number of Deaths");
+
+				d3.csv("/Data/deaths_age_sex.csv", function(info){
+					map.selectAll("g")
+						.data(info)
+						.enter()
+						.append("circle")
+							.attr("cx", function (d) { return map_x(d.x); } )
+							.attr("cy", function (d) { return map_y(d.y); } )
+							.attr("r", 2)
+							.attr("id", function (d) { return d.date; } )
+							.style("fill", function (d) {
+								if (d.age == "0"){
+									return ("#f7f7f7")
+								} if (d.age == "1"){
+									return ("#d9d9d9")
+								} if (d.age == "2") {
+									return ("#bdbdbd")
+								} if (d.age == "3") {
+									return ("#969696")
+								} if (d.age == "4") {
+									return ("#636363") 
+								} else {
+									return ("#252525")
+								}
+							;})
+							.style("opacity", "1")
+							.style("stroke", function (d) {
+								if (d.gender == "0"){
+									return ("#008837")
+								} else {
+									return ("#7b3194")
+								}
+							;})
+							.style("stroke-width", "0.7");
+					
+					var brush = d3.svg.brush()
+						.x(timeline_x)
+						.on("brush", function() { update_map(brush); update_pie(brush); update_chart(brush);})
+				
+					timeline.append("g")
+						.attr("class", "x brush")
+						.call(brush)
+						.selectAll("rect")
+							.attr("y", 0)
+							.attr("height", 0.2 * view_y);
+					
+					info.forEach(function (d){
+						if (d.gender == "0"){
+							gender_data.male = gender_data.male + 1
+						} if (d.gender == "1"){
+							gender_data.female = gender_data.female + 1
+						}
+						pie_data = gender_pie(d3.entries(gender_data))
+						gender_chart
+							.selectAll("g")
+							.data(pie_data)
+							.enter()
+							.append('path')
+								.attr('d', arc_gen)	
+								.attr('fill', function (d) { 
+									return(pie_cols(d.data.key) ) } )
+								.attr("stroke", "#000")
+								.style("stroke-width", "1px");
+						gender_chart
+							.selectAll("g")
+							.data(pie_data)
+							.enter()
+							.append("text")
+								.text(function (d) { return d.data.value } )
+								.attr("transform", function (d) { return ("translate (" + arc_gen.centroid(d) + ")"); })
+								.style("text-anchor", "middle")
+								.style("fill", "#fff")
+								.style("font-size", "24px");
+						})
+					
+					info.forEach(function (d){
+						age_data[d.age] = age_data[d.age] + 1
+						})
+					
+					hist_data = d3.entries(age_data)
+					
+					age_chart
+						.selectAll("rect")
+						.data(hist_data)
+						.enter()
+						.append("rect")
+							.attr("x", function(d) { return age_x(d.key); } )
+							.attr("y", function(d) { return age_y(d.value); } )
+							.attr("width", pie_width / 6)
+							.attr("height", function(d) { return (pie_height - age_y(d.value)); } )
+							.attr("fill", function (d) {
+								return (age_cols(d.key)) } )
+							.attr("stroke", "#000")
+							.attr("transform", "translate(" + (map_width + margin.left) + "," + (3.5 * margin.top + pie_height) + ")")
+							.style("stroke-width", "1px")
+										
+					function update_map(brush){
+						var deaths = d3.selectAll("circle");
+						if (brush.empty()){
+							deaths
+								.style("opacity", 1)
+						} else {
+							var brush_coords = brush.extent();
+							deaths
+								.style("opacity", function (d) {
+									if (new Date(d.date) >= brush_coords[0] && new Date(d.date) <= brush_coords[1] || d.date === undefined){
+										return ("1")
+									} else {
+										return ("0")
+									}
+								})
+						}
+					}
+					
+					function update_pie (brush){
+						gender_data.male = 0
+						gender_data.female = 0
+						if (brush.empty()){
+							info.forEach(function (d){
+								if (d.gender == "0"){
+									gender_data.male = gender_data.male + 1
+								} if (d.gender == "1"){
+									gender_data.female = gender_data.female + 1
+								}
+							})
+						} else {
+							var brush_coords = brush.extent()
+							info.forEach(function (d){
+								if (new Date(d.date) >= brush_coords[0] && new Date(d.date) <= brush_coords[1] || d.date === undefined){
+									if (d.gender == "0"){
+										gender_data.male = gender_data.male + 1
+									} if (d.gender == "1"){
+										gender_data.female = gender_data.female + 1
+									}	
+								}
+							})
+						}
+					pie_data = gender_pie(d3.entries(gender_data))
+					gender_chart
+						.selectAll("g")
+						.data(pie_data)
+						.enter()
+						.append('path')
+						.attr('d', d3.svg.arc()
+							.innerRadius(0)
+							.outerRadius(pie_rad)
+						)
+						.attr('fill', function (d) { 
+							return(pie_cols(d.data.key) ) } )
+						.attr("stroke", "#000")
+						.style("stroke-width", "1px");
+					gender_chart
+							.selectAll("g")
+							.data(pie_data)
+							.enter()
+							.append("text")
+							.text(function (d) { 
+								if (d.data.value > 0){
+									return d.data.value
+								}
+							})
+							.attr("transform", function (d) { return ("translate (" + arc_gen.centroid(d) + ")"); })
+							.style("text-anchor", "middle")
+							.style("fill", "#fff")
+							.style("font-size", "24px");
+					}
+					
+					function update_chart (brush) {
+						age_chart
+							.selectAll("rect")
+							.remove()
+						age_data = {"0" : 0, "1" : 0, "2" : 0, "3" : 0, "4" : 0, "5" : 0}
+						if (brush.empty()){
+							info.forEach(function (d){
+							age_data[d.age] = age_data[d.age] + 1
+							})
+						} else {
+							var brush_coords = brush.extent()
+							info.forEach(function (d){
+								if (new Date(d.date) >= brush_coords[0] && new Date(d.date) <= brush_coords[1] || d.date === undefined){
+									age_data[d.age] = age_data[d.age] + 1
+								}
+							})
+						}
+						hist_data = d3.entries(age_data)
+						age_chart
+							.selectAll("rect")
+							.data(hist_data)
+							.enter()
+							.append("rect")
+								.attr("x", function(d) { return age_x(d.key); } )
+								.attr("y", function(d) { return age_y(d.value); } )
+								.attr("width", pie_width / 6)
+								.attr("height", function(d) { return (pie_height - age_y(d.value)); } )
+								.attr("fill", function (d) {
+									return (age_cols(d.key)) } )
+								.attr("stroke", "#000")
+								.attr("transform", "translate(" + (map_width + margin.left) + "," + (3.5 * margin.top + pie_height) + ")")
+								.style("stroke-width", "1px")
+					}
+				});
+			
+			});
+				
+		</script>
+	</body>
+</html>
